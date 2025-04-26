@@ -1,6 +1,38 @@
-# CS.Supply - CS:GO Skin Marketplace
+# CS.Supply
 
-A modern CS:GO skin marketplace built with Next.js, TypeScript, and Tailwind CSS. This platform allows users to browse, buy, and sell CS:GO skins with real-time pricing and detailed item information.
+A marketplace for CS:GO skins built with Next.js, TypeScript, and Tailwind CSS.
+
+## Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Deployment on Render
+
+This project is configured for easy deployment on Render:
+
+1. Connect your GitHub repository
+2. Render will automatically detect the configuration in `render.yaml`
+3. The build process will install dependencies and build the project
+4. The server will start using the production build
+
+## Tech Stack
+
+- Next.js 14.1.0
+- TypeScript
+- Tailwind CSS
+- Axios for API requests
 
 ## Features
 
@@ -11,40 +43,6 @@ A modern CS:GO skin marketplace built with Next.js, TypeScript, and Tailwind CSS
 - Modern and responsive UI
 - Secure authentication and transactions
 - Integration with LIS-Skins API
-
-## Tech Stack
-
-- **Frontend**: Next.js, TypeScript, Tailwind CSS
-- **State Management**: React Hooks
-- **UI Components**: Headless UI, Heroicons
-- **API Integration**: Axios, SWR
-- **Animations**: Framer Motion
-
-## Getting Started
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/cs.supply.git
-   cd cs.supply
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env.local` file in the root directory with the following content:
-   ```
-   NEXT_PUBLIC_API_KEY=181ae483-7513-4c2a-8230-3c4e48333f01
-   NEXT_PUBLIC_API_BASE_URL=https://api.lis-skins.ru
-   ```
-
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Project Structure
 
@@ -79,17 +77,6 @@ The marketplace integrates with the LIS-Skins API for real-time skin data. Key f
 - Real-time price updates
 - Detailed skin information
 - Secure transaction handling
-
-## Deployment
-
-The project is configured for deployment on Render.com. To deploy:
-
-1. Push your changes to GitHub
-2. Connect your GitHub repository to Render.com
-3. Configure the build settings:
-   - Build Command: `npm run build`
-   - Start Command: `npm start`
-   - Environment Variables: Add the same variables from `.env.local`
 
 ## Contributing
 

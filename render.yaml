@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: cs-supply
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    nodeVersion: 22.14.0
+    autoDeploy: true 
