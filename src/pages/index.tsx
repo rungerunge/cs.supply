@@ -1,115 +1,197 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { useState, useEffect } from 'react';
+import Layout from '@/components/layout/Layout';
+import SkinCard from '@/components/skins/SkinCard';
+import SkinFilters from '@/components/filters/SkinFilters';
+import { api_functions } from '@/lib/api';
+import { Skin, FilterOptions, SortOptions } from '@/types/skin';
+import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 
 export default function Home() {
+  const [skins, setSkins] = useState<Skin[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterOptions>({});
+  const [sort, setSort] = useState<SortOptions>({ field: 'price', direction: 'asc' });
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  // Fetch skins on component mount and when filters/sort change
+  useEffect(() => {
+    const fetchSkins = async () => {
+      try {
+        setLoading(true);
+        const response = await api_functions.getInventory(filters, sort, { page: 1, limit: 24 });
+        if (response.success) {
+          setSkins(response.data.items);
+        } else {
+          setError(response.error || 'Failed to fetch skins');
+        }
+      } catch (err) {
+        setError('An unexpected error occurred');
+        console.error('Error fetching skins:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSkins();
+  }, [filters, sort]);
+
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+    setIsFiltersOpen(false);
+  };
+
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSort({
+      ...sort,
+      field: e.target.value as 'price' | 'float' | 'name',
+    });
+  };
+
+  const toggleSortDirection = () => {
+    setSort({
+      ...sort,
+      direction: sort.direction === 'asc' ? 'desc' : 'asc',
+    });
+  };
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <Layout>
+      <div className="flex flex-col space-y-8">
+        {/* Hero Section */}
+        <section className="text-center py-12">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            The Most Trusted CS:GO Skin Marketplace
+          </h1>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Buy and sell CS:GO skins at the best prices. Instant delivery, secure transactions.
+          </p>
+        </section>
+
+        {/* Filters and Sort */}
+        <section className="flex justify-between items-center">
+          <button
+            onClick={() => setIsFiltersOpen(true)}
+            className="flex items-center space-x-2 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            <AdjustmentsHorizontalIcon className="h-5 w-5" />
+            <span>Filters</span>
+          </button>
+
+          <div className="flex items-center space-x-4">
+            <select
+              value={sort.field}
+              onChange={handleSortChange}
+              className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+            >
+              <option value="price">Price</option>
+              <option value="float">Float</option>
+              <option value="name">Name</option>
+            </select>
+            <button
+              onClick={toggleSortDirection}
+              className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+            >
+              {sort.direction === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
+        </section>
+
+        {/* Active Filters */}
+        {Object.keys(filters).length > 0 && (
+          <section className="flex flex-wrap gap-2">
+            {filters.type?.map((type) => (
+              <span key={type} className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
+                {type}
+              </span>
+            ))}
+            {filters.rarity?.map((rarity) => (
+              <span key={rarity} className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
+                {rarity}
+              </span>
+            ))}
+            {filters.exterior?.map((exterior) => (
+              <span key={exterior} className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
+                {exterior}
+              </span>
+            ))}
+            {filters.priceRange && (
+              <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
+                ${filters.priceRange.min} - ${filters.priceRange.max === Infinity ? '∞' : filters.priceRange.max}
+              </span>
+            )}
+            {filters.float && (
+              <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
+                Float: {filters.float.min} - {filters.float.max}
+              </span>
+            )}
+            {filters.hasStickers && (
+              <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
+                Has Stickers
+              </span>
+            )}
+            {filters.isStatTrak && (
+              <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
+                StatTrak™
+              </span>
+            )}
+            {filters.isSouvenir && (
+              <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
+                Souvenir
+              </span>
+            )}
+            <button
+              onClick={() => setFilters({})}
+              className="bg-red-500 text-white px-3 py-1 rounded-full text-sm hover:bg-red-600 transition"
+            >
+              Clear All
+            </button>
+          </section>
+        )}
+
+        {/* Skins Grid */}
+        <section>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500 text-lg">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : skins.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg">No skins found matching your criteria.</p>
+              <button
+                onClick={() => setFilters({})}
+                className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition"
+              >
+                Clear Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {skins.map((skin) => (
+                <SkinCard key={skin.id} skin={skin} />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Filters Modal */}
+      <SkinFilters
+        isOpen={isFiltersOpen}
+        onClose={() => setIsFiltersOpen(false)}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+      />
+    </Layout>
   );
 }

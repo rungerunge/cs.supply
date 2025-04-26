@@ -1,40 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# CS.Supply - CS:GO Skin Marketplace
+
+A modern CS:GO skin marketplace built with Next.js, TypeScript, and Tailwind CSS. This platform allows users to browse, buy, and sell CS:GO skins with real-time pricing and detailed item information.
+
+## Features
+
+- Browse CS:GO skins with detailed information
+- Real-time pricing with 5% markup
+- Advanced filtering and sorting options
+- Detailed skin information (float, wear, stickers, etc.)
+- Modern and responsive UI
+- Secure authentication and transactions
+- Integration with LIS-Skins API
+
+## Tech Stack
+
+- **Frontend**: Next.js, TypeScript, Tailwind CSS
+- **State Management**: React Hooks
+- **UI Components**: Headless UI, Heroicons
+- **API Integration**: Axios, SWR
+- **Animations**: Framer Motion
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/cs.supply.git
+   cd cs.supply
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env.local` file in the root directory with the following content:
+   ```
+   NEXT_PUBLIC_API_KEY=181ae483-7513-4c2a-8230-3c4e48333f01
+   NEXT_PUBLIC_API_BASE_URL=https://api.lis-skins.ru
+   ```
+
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Project Structure
+
+```
+cs.supply/
+├── src/
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── Layout.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   └── Footer.tsx
+│   │   ├── skins/
+│   │   │   └── SkinCard.tsx
+│   │   └── filters/
+│   │       └── SkinFilters.tsx
+│   ├── lib/
+│   │   └── api.ts
+│   ├── types/
+│   │   └── skin.ts
+│   └── pages/
+│       └── index.tsx
+├── public/
+├── styles/
+└── package.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API Integration
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+The marketplace integrates with the LIS-Skins API for real-time skin data. Key features include:
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+- Fetching available skins with filtering and pagination
+- Real-time price updates
+- Detailed skin information
+- Secure transaction handling
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The project is configured for deployment on Render.com. To deploy:
 
-## Learn More
+1. Push your changes to GitHub
+2. Connect your GitHub repository to Render.com
+3. Configure the build settings:
+   - Build Command: `npm run build`
+   - Start Command: `npm start`
+   - Environment Variables: Add the same variables from `.env.local`
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Acknowledgments
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+- LIS-Skins API for providing the skin data
+- Next.js team for the amazing framework
+- Tailwind CSS for the utility-first CSS framework
