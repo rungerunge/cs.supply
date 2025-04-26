@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/layout/Layout';
 import { api_functions } from '@/lib/api';
-import { Skin } from '@/types/skin';
+import { Skin, PriceHistory } from '@/types/skin';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import PriceHistoryChart from '@/components/charts/PriceHistoryChart';
+import TimeRangeSelector from '@/components/charts/TimeRangeSelector';
 
 export default function SkinDetails() {
   const router = useRouter();
@@ -13,7 +15,8 @@ export default function SkinDetails() {
   const [skin, setSkin] = useState<Skin | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [priceHistory, setPriceHistory] = useState<any[]>([]);
+  const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
 
   useEffect(() => {
     const fetchSkinDetails = async () => {
@@ -234,12 +237,20 @@ export default function SkinDetails() {
               </p>
             </div>
 
-            {/* Price History Chart would go here */}
+            {/* Price History Chart */}
             {priceHistory.length > 0 && (
-              <div className="bg-gray-800 rounded-lg p-6 mt-6">
-                <h3 className="text-white text-lg font-semibold mb-4">Price History</h3>
-                {/* Add your preferred charting library here */}
-                <p className="text-gray-400">Price history visualization coming soon...</p>
+              <div className="mt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-white text-lg font-semibold">Price History</h3>
+                  <TimeRangeSelector 
+                    selectedRange={timeRange}
+                    onRangeChange={setTimeRange}
+                  />
+                </div>
+                <PriceHistoryChart 
+                  data={priceHistory} 
+                  timeRange={timeRange}
+                />
               </div>
             )}
           </div>

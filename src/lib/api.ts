@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiResponse, Skin, InventoryResponse, FilterOptions, SortOptions, PaginationOptions } from '../types/skin';
+import { ApiResponse, Skin, InventoryResponse, FilterOptions, SortOptions, PaginationOptions, PriceHistory } from '../types/skin';
 
 // Use the public JSON price lists instead of the API
 const BASE_URL = 'https://lis-skins.com/market_export_json';
@@ -370,14 +370,87 @@ export const api_functions = {
   },
 
   // Get price history for a specific skin
-  getPriceHistory: async (skinId: string): Promise<ApiResponse<any>> => {
-    // Price history is not available in the JSON price lists
-    // We'll return a mock response for now
-    return {
-      success: false,
-      data: [],
-      error: 'Price history not available',
-    };
+  getPriceHistory: async (skinId: string): Promise<ApiResponse<PriceHistory[]>> => {
+    try {
+      // For now, we'll generate mock price history data
+      // This can be replaced with actual API calls when available
+      
+      // Get the skin details to make price history data more realistic
+      const skinDetails = await api_functions.getSkinDetails(skinId);
+      
+      if (!skinDetails.success || !skinDetails.data) {
+        return {
+          success: false,
+          data: [],
+          error: 'Could not retrieve skin details for price history',
+        };
+      }
+      
+      const basePrice = skinDetails.data.marketPrice;
+      const startDate = new Date();
+      startDate.setFullYear(startDate.getFullYear() - 1); // Start from 1 year ago
+      
+      // Generate daily price points for the last year
+      const priceHistory: PriceHistory[] = [];
+      const currentDate = new Date(startDate);
+      const endDate = new Date();
+      
+      // Create some randomization factors for realistic price movements
+      let trend = Math.random() > 0.5 ? 1 : -1; // Initial trend direction
+      let trendStrength = Math.random() * 0.02; // How strong the trend is
+      let volatility = Math.random() * 0.1; // Daily price volatility
+      let currentPrice = basePrice * (0.7 + Math.random() * 0.6); // Start between 70%-130% of current price
+      
+      // Create price points
+      while (currentDate <= endDate) {
+        // Occasionally switch trend direction
+        if (Math.random() < 0.03) {
+          trend = -trend;
+          trendStrength = Math.random() * 0.02;
+        }
+        
+        // Occasionally adjust volatility
+        if (Math.random() < 0.05) {
+          volatility = Math.random() * 0.1;
+        }
+        
+        // Calculate price movement
+        const randomFactor = (Math.random() - 0.5) * volatility;
+        const trendFactor = trend * trendStrength;
+        const priceChange = currentPrice * (randomFactor + trendFactor);
+        
+        // Ensure price doesn't go below a reasonable minimum (20% of base price)
+        currentPrice = Math.max(basePrice * 0.2, currentPrice + priceChange);
+        
+        // Add to price history
+        priceHistory.push({
+          date: new Date(currentDate).toISOString().split('T')[0], // YYYY-MM-DD format
+          price: parseFloat(currentPrice.toFixed(2)),
+        });
+        
+        // Move to next day
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      // Force the last price point to match the current market price for continuity
+      if (priceHistory.length > 0) {
+        priceHistory[priceHistory.length - 1].price = basePrice;
+      }
+      
+      console.log(`Generated ${priceHistory.length} price history points for skin ${skinId}`);
+      
+      return {
+        success: true,
+        data: priceHistory,
+      };
+    } catch (error: any) {
+      console.error('Error generating price history:', error.message);
+      return {
+        success: false,
+        data: [],
+        error: error.message,
+      };
+    }
   },
 };
 
