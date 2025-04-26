@@ -8,7 +8,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Add custom colors if needed
+        primary: '#1a1a1a',
+        secondary: '#2d2d2d',
+        accent: '#4a4a4a',
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
       },
     },
   },
