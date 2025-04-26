@@ -16,6 +16,8 @@ export interface Skin {
   isSouvenir: boolean;
   phase?: string;
   pattern?: string;
+  nameTag?: string; // Custom name tag applied to the skin
+  unlockAt?: string; // ISO date string when the trade lock expires
 }
 
 export interface Sticker {
