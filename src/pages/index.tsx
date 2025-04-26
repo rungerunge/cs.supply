@@ -14,6 +14,10 @@ export default function Home() {
   const [sort, setSort] = useState<SortOptions>({ field: 'price', direction: 'asc' });
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [useMockData, setUseMockData] = useState(false);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 24;
 
   // Filter and sort the mock data locally
   const filterAndSortMockSkins = () => {
@@ -77,52 +81,72 @@ export default function Home() {
       return sort.direction === 'asc' ? comparison : -comparison;
     });
     
-    return filteredSkins.slice(0, 24); // Limit to 24 items per page
+    // Calculate pagination for mock data
+    const totalFilteredItems = filteredSkins.length;
+    const totalFilteredPages = Math.ceil(totalFilteredItems / itemsPerPage);
+    
+    setTotalItems(totalFilteredItems);
+    setTotalPages(totalFilteredPages);
+    
+    // Apply pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    
+    return filteredSkins.slice(startIndex, endIndex);
   };
 
-  // Fetch skins on component mount and when filters/sort change
+  // Fetch skins on component mount and when filters/sort/page change
   useEffect(() => {
     const fetchSkins = async () => {
       setLoading(true);
       
-      try {
-        if (useMockData) {
-          // Use mock data with client-side filtering/sorting
-          const filteredSkins = filterAndSortMockSkins();
-          setSkins(filteredSkins);
-          setError(null);
-        } else {
-          // Try real API first
-          const response = await api_functions.getInventory(filters, sort, { page: 1, limit: 24 });
-          
-          if (response.success) {
-            setSkins(response.data.items);
-            setError(null);
-          } else {
-            console.error('API error, falling back to mock data:', response.error);
-            setUseMockData(true);
-            const filteredSkins = filterAndSortMockSkins();
-            setSkins(filteredSkins);
-            setError(null);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching skins, falling back to mock data:', err);
-        setUseMockData(true);
+      if (useMockData) {
+        // Use mock data with client-side filtering/sorting/pagination
         const filteredSkins = filterAndSortMockSkins();
         setSkins(filteredSkins);
         setError(null);
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        // Use real API
+        const response = await api_functions.getInventory(
+          filters, 
+          sort, 
+          { page: currentPage, limit: itemsPerPage }
+        );
+        
+        if (response.success) {
+          setSkins(response.data.items);
+          setTotalItems(response.data.total);
+          setTotalPages(response.data.totalPages);
+          setError(null);
+        } else {
+          console.error('API error:', response.error);
+          setError('Failed to fetch skins. Please try again.');
+          
+          // Only fall back to mock data after explicit user action
+          // Don't automatically switch to mock data
+        }
+      } catch (err) {
+        console.error('Error fetching skins:', err);
+        setError('Network error. Please check your connection and try again.');
+        
+        // Only fall back to mock data after explicit user action
+        // Don't automatically switch to mock data
       } finally {
         setLoading(false);
       }
     };
 
     fetchSkins();
-  }, [filters, sort, useMockData]);
+  }, [filters, sort, currentPage, useMockData]);
 
   const handleFilterChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
     setIsFiltersOpen(false);
+    setCurrentPage(1); // Reset to first page on filter change
   };
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -130,6 +154,7 @@ export default function Home() {
       ...sort,
       field: e.target.value as 'price' | 'float' | 'name',
     });
+    setCurrentPage(1); // Reset to first page on sort change
   };
 
   const toggleSortDirection = () => {
@@ -137,6 +162,16 @@ export default function Home() {
       ...sort,
       direction: sort.direction === 'asc' ? 'desc' : 'asc',
     });
+    setCurrentPage(1); // Reset to first page on sort direction change
+  };
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  
+  const handleFallbackToMockData = () => {
+    setUseMockData(true);
+    setCurrentPage(1);
   };
 
   return (
@@ -154,7 +189,7 @@ export default function Home() {
       {/* Data Source Indicator */}
       {useMockData && (
         <div className="bg-yellow-500 bg-opacity-10 border border-yellow-500 rounded-md p-3 text-yellow-500 text-center">
-          <p>Showing sample data for demonstration. Real API connection will be established soon.</p>
+          <p>Showing sample data for demonstration. Currently using offline mock data.</p>
         </div>
       )}
 
@@ -249,12 +284,22 @@ export default function Home() {
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-red-500 text-lg">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition"
-            >
-              Try Again
-            </button>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition"
+              >
+                Try Again
+              </button>
+              {!useMockData && (
+                <button
+                  onClick={handleFallbackToMockData}
+                  className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+                >
+                  Use Demo Data
+                </button>
+              )}
+            </div>
           </div>
         ) : skins.length === 0 ? (
           <div className="text-center py-12">
@@ -267,11 +312,81 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {skins.map((skin) => (
-              <SkinCard key={skin.id} skin={skin} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {skins.map((skin) => (
+                <SkinCard key={skin.id} skin={skin} />
+              ))}
+            </div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-8 space-x-2">
+                <button
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === 1 
+                      ? 'bg-gray-700 text-gray-500 cursor-not-allowed' 
+                      : 'bg-gray-700 text-white hover:bg-gray-600'
+                  }`}
+                >
+                  Previous
+                </button>
+                
+                {/* Page numbers */}
+                {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                  // Display logic for pagination numbers
+                  let pageNumber: number;
+                  
+                  if (totalPages <= 5) {
+                    // If 5 or fewer pages, show all
+                    pageNumber = i + 1;
+                  } else if (currentPage <= 3) {
+                    // Near the start
+                    pageNumber = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    // Near the end
+                    pageNumber = totalPages - 4 + i;
+                  } else {
+                    // In the middle
+                    pageNumber = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => handlePageChange(pageNumber)}
+                      className={`px-3 py-1 rounded ${
+                        currentPage === pageNumber
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-gray-700 text-white hover:bg-gray-600'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+                
+                <button
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === totalPages 
+                      ? 'bg-gray-700 text-gray-500 cursor-not-allowed' 
+                      : 'bg-gray-700 text-white hover:bg-gray-600'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+            
+            {/* Results summary */}
+            <div className="text-center mt-4 text-gray-400 text-sm">
+              Showing {skins.length} of {totalItems} skins
+            </div>
+          </>
         )}
       </section>
 
