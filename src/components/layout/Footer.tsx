@@ -4,8 +4,8 @@ import Link from 'next/link';
 const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-800 border-t border-gray-700">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">CS.Supply</h3>
@@ -84,11 +84,11 @@ const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="mt-8 pt-8 border-t border-gray-700">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
               © {new Date().getFullYear()} CS.Supply. All rights reserved.
             </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
+            <div className="flex space-x-6 mt-4 sm:mt-0">
               <a href="#" className="text-gray-400 hover:text-white transition">
                 Twitter
               </a>
